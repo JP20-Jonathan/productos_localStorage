@@ -112,6 +112,7 @@ function mostrarDatos(filtro = ""){      // le paso el parametro filtro vacio
     // Mostrar los datos en la tabla
     pedidosMostrar.forEach((p,i) => {
         let fila = d.createElement("tr");
+        fila.classList.add("table-warning")
         fila.innerHTML = `
             <td>${i+1}</td>
             <td>${p.cliente}</td>
