@@ -13,6 +13,41 @@ let tabla = d.querySelector(".table > tbody")
 let filtroInput = d.querySelector(".filtro");
 
 
+let posEditando = null;
+let btnActualizar = d.querySelector(".btn-actualizar");
+
+
+// Agregar evento al boton de actualizar
+btnActualizar.addEventListener("click", function() {
+    let pedidos = [];
+    // Extraer datos guardados previamente en el localStorage
+    let pedidosPrevios = JSON.parse (localStorage.getItem(listadoPedidos));
+
+    // Validar datos guardados previamente en el localStorage
+    if(pedidosPrevios != null ){
+        pedidos = pedidosPrevios;
+    }
+        pedidos[posEditando].cliente = clienteInput.value;
+        pedidos[posEditando].producto = productoInput.value;
+        pedidos[posEditando].precio = precioInput.value;
+        pedidos[posEditando].imagen = imagenInput.value;
+        pedidos[posEditando].observacion = observacionInput.value;
+    
+//Guardar los datos editados en localStorage
+        localStorage.setItem(listadoPedidos, JSON.stringify(pedidos));
+        alert("El dato fue actualizado con exito!!")
+        clienteInput.value = "";
+        productoInput.value = "";
+        precioInput.value = "";
+        imagenInput.value = "";
+        observacionInput.value = "";
+
+        btnActualizar.classList.toggle("d-none");
+        btnGuardar.classList.toggle("d-none");
+
+        borrarTabla();
+        mostrarDatos();
+    });
 
 // Agregar evento click al boton del formulario
 btnGuardar.addEventListener("click", () => {
@@ -104,7 +139,9 @@ function mostrarDatos(filtro = ""){      // le paso el parametro filtro vacio
     // Si hay texto escrito, dejo solo los clientes que Empiecen por ese texto
     let pedidosMostrar = filtro === "" 
     ? pedidosConIndice
-    : pedidosConIndice.filter(p => p.cliente.toLowerCase().startsWith(filtro.toLowerCase()));
+    : pedidosConIndice.filter(p =>
+        p.cliente.toLowerCase().startsWith(filtro.toLowerCase()) ||   // Filtrar por cliente
+        p.producto.toLowerCase().startsWith(filtro.toLowerCase()));   // Filtrar por producto
 
     // console.log(pedidos);
     
@@ -112,7 +149,7 @@ function mostrarDatos(filtro = ""){      // le paso el parametro filtro vacio
     // Mostrar los datos en la tabla
     pedidosMostrar.forEach((p,i) => {
         let fila = d.createElement("tr");
-        fila.classList.add("table-warning")
+        fila.classList.add("table-warning");
         fila.innerHTML = `
             <td>${i+1}</td>
             <td>${p.cliente}</td>
@@ -121,8 +158,8 @@ function mostrarDatos(filtro = ""){      // le paso el parametro filtro vacio
             <td> <img src="${p.imagen}" width="65%"></td>
             <td>${p.observacion}</td>
             <td>
-            <span onclick="actualizarPedido(${i})"class="btn-editar btn btn-warning">✏️</span>
-            <span onclick="eliminarPedido(${i})" class="btn-eliminar btn btn-danger">❌</span>
+            <span onclick="actualizarPedido(${p.indiceReal})"class="btn-editar btn btn-warning">✏️</span>
+            <span onclick="eliminarPedido(${p.indiceReal})" class="btn-eliminar btn btn-danger">❌</span>
             </td>
         `;
         tabla.appendChild(fila);
@@ -133,7 +170,7 @@ function mostrarDatos(filtro = ""){      // le paso el parametro filtro vacio
 // Quitar los datos de la tabla
 function borrarTabla(){
     let filas = d.querySelectorAll(".table tbody tr");
-    console.log(filas);
+    // console.log(filas); // COMENTADO PARA QUE NO ME VUELVA UN DESCONTROL LA CONSOLA AL FILTRAR UN CLIENTE O PRODUCTO
     filas.forEach((f)=>{
         f.remove();
     })
@@ -179,35 +216,16 @@ function actualizarPedido(pos) {
     clienteInput.value = pedidos[pos].cliente;
     productoInput.value = pedidos[pos].producto;
     precioInput.value = pedidos[pos].precio;
+    imagenInput.value = pedidos[pos].imagen;
     observacionInput.value = pedidos[pos].observacion;
 
     // Seleccionar el boton de actualizar
-    let btnActualizar = d.querySelector(".btn-actualizar");
     btnActualizar.classList.toggle("d-none");
     btnGuardar.classList.toggle("d-none");
 
-    // Agregar evento al boton de actualizar
-    btnActualizar.addEventListener("click", function() {
-        pedidos[pos].cliente = clienteInput.value;
-        pedidos[pos].producto = productoInput.value;
-        pedidos[pos].precio = precioInput.value;
-        pedidos[pos].observacion = observacionInput.value;
+    posEditando = pos;
 
-        //Guardar los datos editados en localStorage
-        localStorage.setItem(listadoPedidos, JSON.stringify(pedidos));
-        alert("El dato fue actualizado con exito!!")
-        clienteInput.value = "";
-        productoInput.value = "";
-        precioInput.value = "";
-        observacionInput.value = "";
-
-        btnActualizar.classList.toggle("d-none");
-        btnGuardar.classList.toggle("d-none");
-
-        borrarTabla();
-        mostrarDatos();
-    });
-}
+};
 
 
 // Mostrar los datos de localStorage al recargar la pagina
